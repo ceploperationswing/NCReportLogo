@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Photo Report</title>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+
+
+
+    <style>
+        /************************************************
+PAGE SETUP
+************************************************/
+
+
+        @page {
+
+            size: A4;
+
+            margin: 0;
+
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+        }
+
+
+
+        html,
+        body {
+
+            width: 100%;
+
+            height: 100%;
+
+        }
+
+
+
+        body {
+
+            background: #ececec;
+
+            font-family: "Times New Roman", serif;
+
+            -webkit-print-color-adjust: exact;
+
+            print-color-adjust: exact;
+
+        }
+
+
+
+
+        /************************************************
+BUTTON AREA
+************************************************/
+
+
+        .buttonRow {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 10px;
+
+        }
+
+
+
+        button {
+
+            padding: 6px 12px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+        }
+
+
+
+        input {
+
+            font-family: "Times New Roman", serif;
+
+        }
+
+
+
+
+        /************************************************
+A4 PAGE
+************************************************/
+
+
+        .page {
+
+
+            width: calc(210mm - 40px);
+            min-height: calc(297mm - 100px);
+            margin: 50px 20px;
+            background: #fff;
+            border: 2px solid #000;
+            padding: 2mm;
+            page-break-after: always;
+
+
+        }
+
+
+
+        .page:last-child {
+
+
+            page-break-after: auto;
+
+
+        }
+
+
+
+        /************************************************
+LOGOS
+************************************************/
+
+
+        .logos {
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+
+        }
+
+
+        /************************************************
+PHOTO TABLE
+2 TD PER PAGE
+************************************************/
+        /************************************************
+PHOTO TABLE
+2 EQUAL TD PER PAGE
+************************************************/
+
+        .photoTable {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+
+        }
+
+
+
+        .photoTable tr {
+            height: 100%;
+
+        }
+
+
+
+        .photoCell {
+            width: 50%;
+            height: 100%;
+            border: 1px solid #666;
+            vertical-align: top;
+            padding: 5px;
+
+        }
+
+
+
+        /************************************************
+DETAIL ROW
+************************************************/
+
+
+        .details {
+
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px;
+            border-bottom: 1px solid #777;
+            font-size: 14px;
+            min-height: 34px;
+
+
+        }
+
+
+
+        .label {
+
+
+            white-space: nowrap;
+
+
+            font-weight: bold;
+
+
+        }
+
+
+
+
+        /************************************************
+TEXT AREA
+************************************************/
+
+
+        .text_area {
+            flex: 1;
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            border: 1px solid #888;
+            outline: none;
+            resize: none;
+            padding: 2px 4px;
+        }
+
+
+
+
+        /************************************************
+PHOTO AREA
+************************************************/
+
+
+        .photoContainer {
+            width: 100%;
+            height: 150mm;
+            padding: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: #fff;
+
+        }
+
+
+
+        .preview {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            border: 1px solid #ddd;
+
+        }
+
+
+
+
+        /************************************************
+FOOTER
+************************************************/
+
+
+        .footer {
+            padding: 8px;
+        }
+
+
+
+        .photoNo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 8px;
+
+
+        }
+
+        .photoLabel {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+
+
+        .photoNumber {
+            width: 55px;
+            height: 24px;
+            text-align: center;
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            border: 1px solid #888;
+        }
+
+
+
+
+        .remarks {
+
+
+            width: 100%;
+
+
+            min-height: 70px;
+
+
+            overflow: hidden;
+
+
+            resize: none;
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            border: 1px solid #888;
+            padding: 6px;
+        }
+
+
+
+
+
+        /************************************************
+PRINT
+************************************************/
+
+
+        @media print {
+
+
+            html,
+            body {
+
+
+                width: 210mm;
+
+
+                height: 297mm;
+
+
+                background: #fff;
+
+
+            }
+
+
+
+            .noPrint {
+                display: none !important;
+            }
+
+
+
+            .page {
+
+
+                margin: 50px 20px;
+
+
+                box-shadow: none;
+
+
+            }
+
+
+
+            .text_area,
+            .remarks,
+            .photoNumber {
+                border: none !important;
+                background: transparent !important;
+
+
+            }
+
+
+
+        }
+    </style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <!--==================================
+CONTROL
+===================================-->
+
+
+    <div class="buttonRow noPrint" style="flex-wrap:wrap;">
+
+        <label style="font-weight:bold;">
+            Number of Photos :-
+        </label>
+
+        <input type="number" id="photoCount" min="1" style="width:70px;text-align:center;height:40px;">
+
+        <button type="button" id="generateButton"
+            style="color:white;height:40px;font-weight:bold;background-color:green;border-radius:5px;">
+            Generate Report
+        </button>
+
+        <div style="width:100%;height:8px;"></div>
+
+        <label style="font-weight:bold;">
+            REC/PFC Logo :-
+        </label>
+
+        <input type="file" id="recLogoInput" accept="image/*">
+
+        <label style="font-weight:bold;margin-left:20px;">
+            Firm Logo :-
+        </label>
+
+        <input type="file" id="nptiLogoInput" accept="image/*">
+
+        <div style="width:100%;height:8px;"></div>
+
+        <label><b>REC/PFC W</b></label>
+        <input type="number" id="recLogoWidth" value="120" style="width:65px;">
+
+        <label><b>REC?PFC H</b></label>
+        <input type="number" id="recLogoHeight" value="50" style="width:65px;">
+
+        <label style="margin-left:20px;"><b>FIRM W</b></label>
+        <input type="number" id="nptiLogoWidth" value="130" style="width:65px;">
+
+        <label><b>FIRM H</b></label>
+        <input type="number" id="nptiLogoHeight" value="60" style="width:65px;">
+
+    </div>
+
+
+
+    <!--==================================
+ANNOTATION WINDOW
+===================================-->
+
+    <div id="annotationModal" class="noPrint" style="
+display:none;
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+justify-content:center;
+align-items:center;
+z-index:10000;
+">
+
+        <div style="
+background:#fff;
+width:95%;
+max-width:1200px;
+height:92%;
+display:flex;
+flex-direction:column;
+border-radius:8px;
+overflow:hidden;
+">
+
+            <!--========================
+TOOLBAR
+=========================-->
+
+            <div style="
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px;
+border-bottom:1px solid #ccc;
+background:#f7f7f7;
+flex-wrap:wrap;
+">
+
+                <button type="button" id="addCircleBtn">
+                    Add Circle
+                </button>
+                <button type="button" id="addRectangleBtn">
+                    Add Rectangle
+                </button>
+                <button type="button" id="addLineBtn">
+                    Add Line
+                </button>
+
+                <button type="button" id="addArrowBtn">
+                    Add Arrow
+                </button>
+
+
+                <button type="button" id="addTextBtn">
+                    Add Text
+                </button>
+
+                <button type="button" id="freeDrawBtn">
+                    Free Draw
+                </button>
+
+                <button type="button" id="deleteShapeBtn">
+                    Delete Selected
+                </button>
+
+                <button type="button" id="clearShapesBtn">
+                    Clear All
+                </button>
+
+                <label>
+
+                    Border Color
+
+                    <input type="color" id="shapeColor" value="#ff0000">
+
+                </label>
+
+                <label>
+
+                    Border Width
+
+                    <input type="range" id="shapeWidth" min="1" max="12" value="3">
+
+                </label>
+
+                <span id="shapeWidthValue">
+
+                    3 px
+
+                </span>
+
+                <div style="flex:1;"></div>
+
+                <button type="button" id="saveAnnotationBtn">
+
+                    Save
+
+                </button>
+
+                <button type="button" id="closeAnnotationBtn">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+            <!--========================
+CANVAS
+=========================-->
+
+            <div style="
+flex:1;
+overflow:auto;
+background:#444;
+display:flex;
+justify-content:center;
+align-items:center;
+">
+
+                <canvas id="annotationCanvas">
+                </canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!--==================================
+GENERATED REPORT
+===================================-->
+
+
+    <div id="reportContainer">
+
+
+    </div>
+
+
+
+
+
+
+    <!--==================================
+PHOTO TEMPLATE
+===================================-->
+
+
+    <template id="photoTemplate">
+
+
+        <td class="photoCell">
+
+
+            <div class="details">
+
+
+                <div class="label">
+
+                    Name of Feeder :-
+
+                </div>
+
+
+                <textarea rows="1" class="text_area"></textarea>
+
+
+            </div>
+
+
+
+
+            <div class="details">
+
+
+                <div class="label">
+
+                    Name of Location :-
+
+                </div>
+
+
+                <textarea rows="1" class="text_area"></textarea>
+
+
+            </div>
+
+
+
+
+
+            <div class="photoContainer" style="position:relative;">
+
+                <img class="preview" style="margin-top: 15px;"
+                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='450' height='650'%3E%3Crect width='100%25' height='100%25' fill='%23f2f2f2'/%3E%3Ctext x='50%25' y='50%25' font-size='26' text-anchor='middle' dominant-baseline='middle' fill='%23888'%3EDouble Click To Select Photo%3C/text%3E%3C/svg%3E">
+                <button type="button" class="editPhotoBtn noPrint" style="
+            position:absolute;
+            right:8px;
+            top:8px;
+            padding:5px 10px;
+            font-size:12px;
+            display:none;
+            ">
+
+                    Edit
+
+                </button>
+
+            </div>
+
+
+
+
+
+
+            <div class="footer">
+
+
+
+                <div class="photoNo">
+
+
+                    <span class="photoLabel">
+
+                        Photo No :-
+
+                    </span>
+
+
+
+                    <input class="photoNumber" type="text" maxlength="4" inputmode="numeric" placeholder="0001" oninput="
+this.value=this.value
+.replace(/[^0-9]/g,'')
+.slice(0,4);
+" style="font-weight: bold; font-size: 16px;">
+
+
+                </div>
+
+
+
+
+                <textarea class="remarks" placeholder="Enter observations here..."></textarea>
+
+
+
+
+            </div>
+
+
+
+        </td>
+
+
+
+    </template>
+    <script>
+
+
+        /************************************************
+        GLOBAL VARIABLES
+        ************************************************/
+
+        let activePhotoCell = null;
+        let selectedImage = null;
+
+        let annotationCanvas = null;
+        let annotationImage = null;
+        let recLogoSrc = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/REC_logo.svg/1280px-REC_logo.svg.png";
+        let nptiLogoSrc = "https://drive.google.com/thumbnail?id=1iEN9jQ5MmkklgiRvmlNihZd4QH3F3DhC&sz=w1000";
+
+     
+        let editingImageElement = null;
+
+        const reportContainer =
+            document.getElementById("reportContainer");
+
+
+        const photoTemplate =
+            document.getElementById("photoTemplate");
+
+
+
+        const generateButton =
+            document.getElementById("generateButton");
+
+
+        //Logo related
+
+        document.getElementById("recLogoInput").addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+
+                recLogoSrc = e.target.result;
+
+                document.querySelectorAll(".rec_logo").forEach(function (img) {
+                    img.src = recLogoSrc;
+                });
+
+                updateLogoSize();
+
+            };
+
+            reader.readAsDataURL(file);
+
+        });
+
+        document.getElementById("nptiLogoInput").addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+
+                nptiLogoSrc = e.target.result;
+
+                document.querySelectorAll(".npti_logo").forEach(function (img) {
+                    img.src = nptiLogoSrc;
+                });
+
+                updateLogoSize();
+
+            };
+
+            reader.readAsDataURL(file);
+
+        });
+
+        /************************************************
+        GENERATE REPORT
+        ************************************************/
+
+        function updateLogoSize() {
+
+            document.querySelectorAll(".rec_logo").forEach(function (img) {
+                img.style.width = document.getElementById("recLogoWidth").value + "px";
+                img.style.height = document.getElementById("recLogoHeight").value + "px";
+            });
+
+            document.querySelectorAll(".npti_logo").forEach(function (img) {
+                img.style.width = document.getElementById("nptiLogoWidth").value + "px";
+                img.style.height = document.getElementById("nptiLogoHeight").value + "px";
+            });
+
+        }
+
+        ["recLogoWidth", "recLogoHeight", "nptiLogoWidth", "nptiLogoHeight"].forEach(function (id) {
+
+            document.getElementById(id).addEventListener("input", updateLogoSize);
+
+        });
+
+
+
+        generateButton.addEventListener(
+            "click",
+            function () {
+
+
+                const totalPhotos =
+                    parseInt(
+                        document.getElementById("photoCount").value
+                    );
+
+                recLogoWidth =
+                    parseInt(document.getElementById("recLogoWidth").value) || 120;
+
+                recLogoHeight =
+                    parseInt(document.getElementById("recLogoHeight").value) || 50;
+
+                nptiLogoWidth =
+                    parseInt(document.getElementById("nptiLogoWidth").value) || 130;
+
+                nptiLogoHeight =
+                    parseInt(document.getElementById("nptiLogoHeight").value) || 60;
+
+                if (!totalPhotos || totalPhotos < 1) {
+
+
+                    alert("Enter number of photos");
+
+
+                    return;
+
+                    markReportModified();
+                }
+
+
+
+                reportContainer.innerHTML = "";
+                let photoCounter = 0;
+                while (photoCounter < totalPhotos) {
+
+
+
+                    /************************************
+                    CREATE A4 PAGE
+                    ************************************/
+
+
+                    const page =
+                        document.createElement("div");
+
+
+                    page.className = "page";
+
+
+
+
+
+                    /************************************
+                    LOGOS
+                    ************************************/
+
+
+                    const logos =
+                        document.createElement("div");
+
+
+                    logos.className = "logos";
+
+
+                    logos.innerHTML = `
+
+<img
+class="rec_logo"
+src="${recLogoSrc}"
+style="width:${recLogoWidth}px;height:${recLogoHeight}px;object-fit:contain;">
+
+<img
+class="npti_logo"
+src="${nptiLogoSrc}"
+style="width:${nptiLogoWidth}px;height:${nptiLogoHeight}px;object-fit:contain;">
+
+`;
+
+
+                    page.appendChild(logos);
+
+
+
+
+
+                    /************************************
+                    TABLE
+                    ************************************/
+
+
+                    const table =
+                        document.createElement("table");
+
+
+                    table.className = "photoTable";
+
+
+
+                    const row =
+                        document.createElement("tr");
+
+
+
+
+
+
+                    /************************************
+                    CREATE TWO TD PER PAGE
+                    ************************************/
+
+                    for (
+                        let i = 0;
+                        i < 2;
+                        i++
+                    ) {
+
+
+                        if (photoCounter < totalPhotos) {
+                            const clone =
+                                photoTemplate.content
+                                    .cloneNode(true);
+                            const cell =
+                                clone.querySelector(".photoCell");
+                            cell.dataset.photo =
+                                photoCounter + 1;
+                            row.appendChild(cell);
+                            photoCounter++;
+                        }
+                        else {
+                            // Empty half-width cell
+                            const emptyCell =
+                                document.createElement("td");
+                            emptyCell.className = "photoCell";
+                            emptyCell.innerHTML = "";
+                            row.appendChild(emptyCell);
+                        }
+                    }
+                    table.appendChild(row);
+                    page.appendChild(table);
+                    reportContainer.appendChild(page);
+                }
+                activatePhotoEvents();
+                enableAutoResize();
+
+                document.querySelectorAll(".photoNumber").forEach(function (input) {
+                    input.addEventListener("input", markReportModified);
+                });
+
+            });
+
+
+
+
+
+
+        /************************************************
+        ACTIVATE PHOTO EVENTS
+        ************************************************/
+
+        function activatePhotoEvents() {
+            document.querySelectorAll(".photoCell").forEach(function (cell) {
+                const image = cell.querySelector(".preview");
+                if (!image) return;
+                let input = cell.querySelector(".photoInput");
+                if (!input) {
+                    input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.className = "photoInput noPrint";
+                    input.style.display = "none";
+                    cell.insertBefore(input, cell.firstChild);
+                }
+                image.ondblclick = function () {
+                    activePhotoCell = cell;
+                    input.value = "";
+                    input.click();
+                };
+                input.onchange = function () {
+                    const file = this.files && this.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        selectedImage = e.target.result;
+                        activePhotoCell = cell;
+                        openCropWindow(selectedImage);
+                    };
+                    reader.readAsDataURL(file);
+                };
+                const editBtn = cell.querySelector(".editPhotoBtn");
+                if (editBtn) {
+                    editBtn.onclick = function () {
+                        openAnnotationEditor(image);
+                    };
+                }
+            });
+        }
+
+
+
+        /************************************************
+        AUTO RESIZE TEXTAREA
+        ************************************************/
+
+
+        function enableAutoResize() {
+            document
+                .querySelectorAll(
+                    ".text_area,.remarks"
+                )
+                .forEach(function (textarea) {
+                    function resize() {
+                        textarea.style.height = "auto";
+                        textarea.style.height =
+                            textarea.scrollHeight + "px";
+                    }
+
+
+
+                    textarea.removeEventListener(
+                        "input",
+                        resize
+                    );
+
+
+
+                    textarea.addEventListener(
+                        "input",
+                        resize
+                    );
+                    textarea.addEventListener(
+                        "input",
+                        markReportModified
+                    );
+
+
+                    resize();
+
+
+
+                });
+
+
+
+        }
+
+
+
+    </script>
+
+
+    <!--==================================
+CROP MODAL
+===================================-->
+
+    <div id="cropModal" class="noPrint" style="
+display:none;
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.75);
+justify-content:center;
+align-items:center;
+z-index:9999;
+">
+
+
+        <div style="
+background:#fff;
+padding:15px;
+width:90%;
+max-width:850px;
+border-radius:6px;
+">
+
+
+            <h3 style="margin-bottom:10px;">
+                Crop Photo
+            </h3>
+
+
+
+            <div style="
+width:100%;
+height:500px;
+overflow:hidden;
+">
+
+
+                <img id="cropImage" style="max-width:100%;">
+
+            </div>
+
+
+
+            <div style="
+margin-top:15px;
+display:flex;
+justify-content:center;
+gap:10px;
+">
+
+
+                <button type="button" id="cropOk">
+
+                    Apply Crop
+
+                </button>
+
+
+
+                <button type="button" id="cropCancel">
+
+                    Cancel
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!--==================================
+CROPPER JS
+===================================-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+
+    <script>
+        const annotationStore = new Map();
+
+        let cropper = null;
+
+
+
+        const cropModal =
+            document.getElementById("cropModal");
+
+
+        const cropImage =
+            document.getElementById("cropImage");
+
+
+        const cropOk =
+            document.getElementById("cropOk");
+
+
+        const cropCancel =
+            document.getElementById("cropCancel");
+
+
+
+
+
+        /************************************************
+        OPEN CROP WINDOW
+        ************************************************/
+
+
+        function openCropWindow(imageSource) {
+
+            cropModal.style.display = "flex";
+
+            cropImage.onload = function () {
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: NaN,
+                    viewMode: 0,
+                    autoCropArea: 1,
+                    responsive: true,
+                    movable: true,
+                    zoomable: true,
+                    scalable: true,
+                    rotatable: true,
+                    dragMode: "move",
+                    guides: true,
+                    center: true,
+                    background: false
+                });
+
+            };
+
+            cropImage.src = imageSource;
+
+        }
+
+        /************************************************
+        APPLY CROP
+        ************************************************/
+
+
+        cropOk.addEventListener(
+            "click",
+            function () {
+
+                if (!cropper || !activePhotoCell) {
+                    return;
+                }
+
+                const photoBox =
+                    activePhotoCell.querySelector(".photoContainer");
+
+                const canvas =
+                    cropper.getCroppedCanvas({
+                        width: photoBox.clientWidth * 3,
+                        height: photoBox.clientHeight * 3,
+                        fillColor: "#ffffff",
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: "high"
+                    });
+
+                const preview =
+                    activePhotoCell.querySelector(".preview");
+
+                const croppedImage =
+                    canvas.toDataURL("image/jpeg", 1);
+
+                /* SAVE ORIGINAL CROPPED IMAGE */
+                preview.dataset.originalImage = croppedImage;
+
+                /* REMOVE OLD ANNOTATIONS */
+                preview.dataset.annotationJson = "";
+
+                /* SHOW CROPPED IMAGE */
+                preview.src = croppedImage;
+                markReportModified();
+
+                cropModal.style.display = "none";
+
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+
+                const editBtn =
+                    activePhotoCell.querySelector(".editPhotoBtn");
+
+                if (editBtn) {
+                    editBtn.style.display = "block";
+                }
+
+                openAnnotationEditor(preview);
+
+            }
+        );
+
+
+
+
+
+        /************************************************
+        CANCEL CROP
+        ************************************************/
+
+
+        cropCancel.addEventListener(
+            "click",
+            function () {
+
+
+
+                cropModal.style.display = "none";
+
+
+
+                if (cropper) {
+
+
+
+                    cropper.destroy();
+
+
+
+                    cropper = null;
+
+
+
+                }
+
+
+
+            });
+
+
+
+
+
+
+        /************************************************
+        PRINT SETTINGS
+        ************************************************/
+
+
+        window.addEventListener(
+            "beforeprint",
+            function () {
+
+
+
+                document
+                    .querySelectorAll(
+                        ".text_area"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "none";
+
+
+                            t.style.background = "transparent";
+
+
+                        });
+
+
+
+
+                document
+                    .querySelectorAll(
+                        ".remarks"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "none";
+
+
+                            t.style.background = "transparent";
+
+
+                        });
+
+
+
+
+
+                document
+                    .querySelectorAll(
+                        ".photoNumber"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "none";
+
+
+                            t.style.background = "transparent";
+
+
+                        });
+
+
+
+            });
+
+
+
+
+
+
+
+        window.addEventListener(
+            "afterprint",
+            function () {
+
+
+
+                document
+                    .querySelectorAll(
+                        ".text_area"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "1px solid #888";
+
+
+                            t.style.background = "#fff";
+
+
+                        });
+
+
+
+
+                document
+                    .querySelectorAll(
+                        ".remarks"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "1px solid #888";
+
+
+                            t.style.background = "#fff";
+
+
+                        });
+
+
+
+
+
+                document
+                    .querySelectorAll(
+                        ".photoNumber"
+                    )
+                    .forEach(
+                        function (t) {
+
+
+                            t.style.border = "1px solid #888";
+
+
+                            t.style.background = "#fff";
+
+
+                        });
+
+
+
+            });
+
+        /************************************************
+     FABRIC ANNOTATION - PART 1
+    ************************************************/
+
+
+        const annotationModal =
+            document.getElementById("annotationModal");
+
+        const annotationCanvasElement =
+            document.getElementById("annotationCanvas");
+
+        const addCircleBtn =
+            document.getElementById("addCircleBtn");
+        const addLineBtn =
+            document.getElementById("addLineBtn");
+
+        const addArrowBtn =
+            document.getElementById("addArrowBtn");
+
+        const deleteShapeBtn =
+            document.getElementById("deleteShapeBtn");
+
+        const clearShapesBtn =
+            document.getElementById("clearShapesBtn");
+
+        const saveAnnotationBtn =
+            document.getElementById("saveAnnotationBtn");
+
+        const closeAnnotationBtn =
+            document.getElementById("closeAnnotationBtn");
+
+        const shapeColor =
+            document.getElementById("shapeColor");
+
+        const shapeWidth =
+            document.getElementById("shapeWidth");
+
+        const shapeWidthValue =
+            document.getElementById("shapeWidthValue");
+
+
+        /************************************************
+         OPEN EDITOR
+        ************************************************/
+
+        function openAnnotationEditor(imgElement) {
+
+            editingImageElement = imgElement;
+
+            annotationModal.style.display = "flex";
+
+            if (annotationCanvas) {
+                annotationCanvas.dispose();
+                annotationCanvas = null;
+            }
+
+            annotationCanvas = new fabric.Canvas("annotationCanvas", {
+                preserveObjectStacking: true,
+                selection: true
+            });
+
+            annotationCanvas.defaultCursor = "default";
+
+            const originalImage =
+                imgElement.dataset.originalImage || imgElement.src;
+
+            const savedJSON =
+                imgElement.dataset.annotationJson;
+
+            fabric.Image.fromURL(originalImage, function (fabricImg) {
+
+                annotationImage = fabricImg;
+
+                const maxWidth = window.innerWidth * 0.90;
+                const maxHeight = window.innerHeight * 0.75;
+
+                const scale = Math.min(
+                    maxWidth / fabricImg.width,
+                    maxHeight / fabricImg.height,
+                    1
+                );
+
+                annotationCanvas.setWidth(fabricImg.width * scale);
+                annotationCanvas.setHeight(fabricImg.height * scale);
+
+                fabricImg.scale(scale);
+
+                fabricImg.set({
+                    left: 0,
+                    top: 0,
+                    originX: "left",
+                    originY: "top",
+                    selectable: false,
+                    evented: false
+                });
+
+                annotationCanvas.setBackgroundImage(
+                    fabricImg,
+                    function () {
+
+                        if (savedJSON) {
+
+                            annotationCanvas.loadFromJSON(
+                                savedJSON,
+                                function () {
+
+                                    annotationCanvas.setBackgroundImage(
+                                        annotationImage,
+                                        annotationCanvas.renderAll.bind(annotationCanvas)
+                                    );
+
+                                    annotationCanvas.getObjects().forEach(function (obj) {
+
+                                        obj.selectable = true;
+                                        obj.evented = true;
+                                        obj.hasControls = true;
+                                        obj.hasBorders = true;
+                                        obj.lockMovementX = false;
+                                        obj.lockMovementY = false;
+                                        obj.lockScalingX = false;
+                                        obj.lockScalingY = false;
+                                        obj.lockRotation = false;
+
+                                    });
+
+                                    registerDrawingEvents();
+
+                                    annotationCanvas.renderAll();
+
+                                }
+                            );
+
+                        } else {
+
+                            registerDrawingEvents();
+
+                            annotationCanvas.renderAll();
+
+                        }
+
+                    },
+                    {
+                        scaleX: fabricImg.scaleX,
+                        scaleY: fabricImg.scaleY
+                    }
+                );
+
+            });
+
+        }
+
+        function registerDrawingEvents() {
+
+            annotationCanvas.on("mouse:down", function (opt) {
+
+                if (drawMode == "")
+                    return;
+
+                drawing = true;
+
+                const p = annotationCanvas.getPointer(opt.e);
+
+                startX = p.x;
+                startY = p.y;
+
+                if (drawMode == "circle") {
+
+                    currentShape = new fabric.Circle({
+
+                        left: startX,
+                        top: startY,
+                        radius: 1,
+                        originX: "center",
+                        originY: "center",
+                        fill: "transparent",
+                        stroke: shapeColor.value,
+                        strokeWidth: Number(shapeWidth.value)
+
+                    });
+
+                }
+
+                if (drawMode == "rect") {
+
+                    currentShape = new fabric.Rect({
+
+                        left: startX,
+                        top: startY,
+                        width: 1,
+                        height: 1,
+                        fill: "transparent",
+                        stroke: shapeColor.value,
+                        strokeWidth: Number(shapeWidth.value)
+
+                    });
+
+                }
+
+
+
+
+                if (drawMode == "line") {
+
+                    currentShape = new fabric.Line(
+                        [startX, startY, startX, startY],
+                        {
+                            stroke: shapeColor.value,
+                            strokeWidth: Number(shapeWidth.value),
+                            selectable: true
+                        }
+                    );
+
+                }
+
+                if (drawMode == "arrow") {
+
+                    currentShape = new fabric.Polyline(
+                        [
+                            { x: startX, y: startY },
+                            { x: startX, y: startY }
+                        ],
+                        {
+                            fill: "",
+                            stroke: shapeColor.value,
+                            strokeWidth: Number(shapeWidth.value),
+                            strokeLineCap: "round",
+                            strokeLineJoin: "round",
+                            objectCaching: false
+                        }
+                    );
+
+                }
+
+                annotationCanvas.add(currentShape);
+
+            });
+
+
+
+
+
+
+            annotationCanvas.on("mouse:move", function (opt) {
+
+                if (!drawing)
+                    return;
+
+                const p = annotationCanvas.getPointer(opt.e);
+
+                if (drawMode == "circle") {
+
+                    currentShape.set({
+
+                        radius: Math.sqrt(
+                            Math.pow(p.x - startX, 2) +
+                            Math.pow(p.y - startY, 2)
+                        )
+
+                    });
+
+                }
+
+                if (drawMode == "rect") {
+
+                    currentShape.set({
+
+                        left: Math.min(startX, p.x),
+
+                        top: Math.min(startY, p.y),
+
+                        width: Math.abs(p.x - startX),
+
+                        height: Math.abs(p.y - startY)
+
+                    });
+                }
+
+
+                if (drawMode == "line") {
+
+                    currentShape.set({
+
+                        x2: p.x,
+                        y2: p.y
+
+                    });
+
+                }
+
+
+                if (drawMode == "arrow") {
+
+                    const angle = Math.atan2(
+                        p.y - startY,
+                        p.x - startX
+                    );
+
+                    const head = 18;
+
+                    const leftX =
+                        p.x - head * Math.cos(angle - Math.PI / 6);
+
+                    const leftY =
+                        p.y - head * Math.sin(angle - Math.PI / 6);
+
+                    const rightX =
+                        p.x - head * Math.cos(angle + Math.PI / 6);
+
+                    const rightY =
+                        p.y - head * Math.sin(angle + Math.PI / 6);
+
+                    currentShape.set({
+                        points: [
+                            { x: startX, y: startY },
+                            { x: p.x, y: p.y },
+                            { x: leftX, y: leftY },
+                            { x: p.x, y: p.y },
+                            { x: rightX, y: rightY }
+                        ]
+                    });
+
+                }
+
+                annotationCanvas.renderAll();
+
+            });
+
+
+
+
+
+            annotationCanvas.on("mouse:up", function () {
+
+                drawing = false;
+
+                drawMode = "";
+
+                annotationCanvas.selection = true;
+
+                annotationCanvas.defaultCursor = "default";
+
+                currentShape = null;
+
+            });
+
+        }
+
+        /************************************************
+         CLOSE EDITOR
+        ************************************************/
+
+        closeAnnotationBtn.onclick = function () {
+
+            annotationModal.style.display = "none";
+
+            if (annotationCanvas) {
+
+                annotationCanvas.dispose();
+
+                annotationCanvas = null;
+
+            }
+
+        };
+
+
+        /************************************************
+         UPDATE BORDER WIDTH LABEL
+        ************************************************/
+
+
+
+
+        /************************************************
+         ACTIVATE EDIT BUTTONS
+        ************************************************/
+
+        function activateAnnotationButtons() {
+
+            document
+                .querySelectorAll(".editPhotoBtn")
+                .forEach(function (btn) {
+
+                    btn.onclick = function () {
+
+                        const img =
+                            this.parentElement
+                                .querySelector(".preview");
+
+                        openAnnotationEditor(img);
+
+                    };
+
+                });
+
+        }
+
+
+        /************************************************
+         CALL AFTER REPORT GENERATION
+        ************************************************/
+
+        const oldActivatePhotoEvents =
+            activatePhotoEvents;
+
+        activatePhotoEvents = function () {
+
+            oldActivatePhotoEvents();
+
+            activateAnnotationButtons();
+
+        };
+        /************************************************
+         FABRIC ANNOTATION - PART 2
+         DRAW TOOLS
+        ************************************************/
+
+        let drawMode = "";
+        let drawing = false;
+
+        let startX = 0;
+        let startY = 0;
+
+        let currentShape = null;
+
+        /************************************************
+        ADD CIRCLE
+        ************************************************/
+
+        addCircleBtn.onclick = function () {
+
+            drawMode = "circle";
+
+            annotationCanvas.isDrawingMode = false;
+
+            annotationCanvas.selection = false;
+
+            annotationCanvas.defaultCursor = "crosshair";
+
+        };
+
+
+        /************************************************
+        ADD RECTANGLE
+        ************************************************/
+
+        const addRectangleBtn =
+            document.getElementById("addRectangleBtn");
+
+        if (addRectangleBtn) {
+
+            addRectangleBtn.onclick = function () {
+
+                drawMode = "rect";
+
+                annotationCanvas.isDrawingMode = false;
+
+                annotationCanvas.selection = false;
+
+                annotationCanvas.defaultCursor = "crosshair";
+
+            };
+
+        }
+
+
+        /************************************************
+ADD LINE
+************************************************/
+
+        addLineBtn.onclick = function () {
+
+            drawMode = "line";
+
+            annotationCanvas.isDrawingMode = false;
+
+            annotationCanvas.selection = false;
+
+            annotationCanvas.defaultCursor = "crosshair";
+
+        };
+
+
+        /************************************************
+        ADD ARROW
+        ************************************************/
+
+        addArrowBtn.onclick = function () {
+
+            drawMode = "arrow";
+
+            annotationCanvas.isDrawingMode = false;
+
+            annotationCanvas.selection = false;
+
+            annotationCanvas.defaultCursor = "crosshair";
+
+        };
+
+        /************************************************
+        FREE DRAW
+        ************************************************/
+
+        const freeDrawBtn =
+            document.getElementById("freeDrawBtn");
+
+        if (freeDrawBtn) {
+
+            freeDrawBtn.onclick = function () {
+
+                drawMode = "";
+
+                annotationCanvas.selection = true;
+
+                annotationCanvas.isDrawingMode = true;
+
+                annotationCanvas.freeDrawingBrush.color =
+                    shapeColor.value;
+
+                annotationCanvas.freeDrawingBrush.width =
+                    Number(shapeWidth.value);
+
+            };
+
+        }
+
+
+        /************************************************
+        TEXT
+        ************************************************/
+
+        const addTextBtn =
+            document.getElementById("addTextBtn");
+
+        if (addTextBtn) {
+
+            addTextBtn.onclick = function () {
+
+                const txt =
+                    new fabric.IText(
+                        "Text",
+                        {
+
+                            left: 100,
+
+                            top: 100,
+
+                            fill: shapeColor.value,
+
+                            fontSize: 26,
+
+                            editable: true
+
+                        }
+                    );
+
+                annotationCanvas.add(txt);
+
+                annotationCanvas.setActiveObject(txt);
+
+            };
+
+        }
+
+
+
+        /************************************************
+FABRIC ANNOTATION - PART 3
+SAVE / DELETE / COLOR / WIDTH
+************************************************/
+
+
+        /************************************************
+        DELETE SELECTED
+        ************************************************/
+
+        deleteShapeBtn.onclick = function () {
+
+            const obj = annotationCanvas.getActiveObject();
+
+            if (!obj) return;
+
+            annotationCanvas.remove(obj);
+
+            annotationCanvas.discardActiveObject();
+
+            annotationCanvas.renderAll();
+
+        };
+
+
+        /************************************************
+        CLEAR ALL
+        ************************************************/
+
+        clearShapesBtn.onclick = function () {
+
+            annotationCanvas.getObjects().forEach(function (obj) {
+
+                annotationCanvas.remove(obj);
+
+            });
+
+            if (annotationImage) {
+
+                annotationCanvas.setBackgroundImage(
+
+                    annotationImage,
+
+                    annotationCanvas.renderAll.bind(annotationCanvas)
+
+                );
+
+            }
+
+        };
+
+
+        /************************************************
+        CHANGE COLOR
+        ************************************************/
+
+        shapeColor.oninput = function () {
+
+            if (annotationCanvas.isDrawingMode) {
+
+                annotationCanvas.freeDrawingBrush.color =
+                    this.value;
+
+            }
+
+            const obj =
+                annotationCanvas.getActiveObject();
+
+            if (!obj) return;
+
+            if (obj.type == "polyline") {
+                obj.set("stroke", shapeColor.value);
+            }
+            else if (obj.type == "group") {
+
+                obj.getObjects().forEach(function (o) {
+
+                    if (o.stroke !== undefined)
+                        o.set("stroke", shapeColor.value);
+
+                    if (o.fill !== undefined)
+                        o.set("fill", shapeColor.value);
+
+                });
+
+            }
+            else if (obj.stroke !== undefined) {
+
+                obj.set("stroke", shapeColor.value);
+
+            }
+
+            if (obj.fill !== undefined &&
+                obj.type == "i-text") {
+
+                obj.set("fill", this.value);
+
+            }
+
+            annotationCanvas.renderAll();
+
+        };
+
+        /************************************************
+        CHANGE WIDTH
+        ************************************************/
+        shapeWidth.addEventListener("input", function () {
+
+            shapeWidthValue.innerHTML = this.value + " px";
+
+            if (!annotationCanvas) return;
+
+            if (annotationCanvas.isDrawingMode) {
+                annotationCanvas.freeDrawingBrush.width =
+                    Number(this.value);
+            }
+
+            const obj = annotationCanvas.getActiveObject();
+
+            if (!obj) return;
+
+            if (obj.type == "polyline") {
+                obj.set("strokeWidth", Number(shapeWidth.value));
+            }
+            else if (obj.type == "group") {
+
+                obj.getObjects().forEach(function (o) {
+
+                    if (o.strokeWidth !== undefined)
+                        o.set("strokeWidth", Number(shapeWidth.value));
+
+                });
+
+            }
+            else if (obj.strokeWidth !== undefined) {
+
+                obj.set(
+                    "strokeWidth",
+                    Number(shapeWidth.value)
+                );
+
+            }
+        });
+
+
+        /************************************************
+        KEYBOARD DELETE
+        ************************************************/
+
+        document.addEventListener(
+            "keydown",
+            function (e) {
+
+                if (
+                    e.key === "Delete" &&
+                    annotationModal.style.display === "flex"
+                ) {
+
+                    const obj =
+                        annotationCanvas.getActiveObject();
+
+                    if (obj) {
+
+                        annotationCanvas.remove(obj);
+
+                        annotationCanvas.renderAll();
+
+                    }
+
+                }
+
+            });
+
+
+        /************************************************
+        SAVE IMAGE
+        ************************************************/
+
+        saveAnnotationBtn.onclick = function () {
+
+            if (!editingImageElement) return;
+
+            const json = annotationCanvas.toJSON();
+
+            annotationStore.set(editingImageElement, json);
+
+            const imgData = annotationCanvas.toDataURL({
+                format: "jpeg",
+                quality: 1
+            });
+
+            editingImageElement.src = imgData;
+            markReportModified();
+
+            annotationModal.style.display = "none";
+
+            annotationCanvas.dispose();
+
+            annotationCanvas = null;
+
+        };
+        /************************************************
+        ESC CLOSE
+        ************************************************/
+
+        document.addEventListener(
+            "keydown",
+            function (e) {
+
+                if (
+                    e.key === "Escape" &&
+                    annotationModal.style.display === "flex"
+                ) {
+
+                    closeAnnotationBtn.click();
+
+                }
+
+            });
+
+
+        /************************************************
+        FIT IMAGE INSIDE MODAL
+        ************************************************/
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                if (annotationCanvas) {
+
+                    annotationCanvas.renderAll();
+
+                }
+
+            });
+
+
+
+        /************************************************
+PREVENT ACCIDENTAL PAGE EXIT
+************************************************/
+
+        let reportModified = false;
+
+        function markReportModified() {
+            reportModified = true;
+        }
+
+        window.addEventListener("beforeunload", function (e) {
+            if (!reportModified) return;
+
+            e.preventDefault();
+            e.returnValue = "";
+        });
+
+    </script>
+
+
+</body>
+
+</html>
