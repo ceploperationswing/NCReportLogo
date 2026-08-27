@@ -60,7 +60,7 @@
             flex-direction: column;
             gap: 8px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-            width: 200px; /* Widened slightly to fit new text tools */
+            width: 200px; 
             pointer-events: auto;
         }
 
@@ -246,6 +246,12 @@
             background-color: black;
         }
 
+        /* Fix SVG sizing during Print Export */
+        .print-svg-wrapper svg {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         /************************************************
         FOOTER
         ************************************************/
@@ -374,7 +380,7 @@
                 </select>
             </div>
 
-            <!-- NEW: TEXT FORMATTING (Size, Bold, Italic, Underline) -->
+            <!-- TEXT FORMATTING (Size, Bold, Italic, Underline) -->
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <select id="drawFontSize" title="Font Size" style="width:50px; padding:2px; font-size:12px; cursor:pointer; border-radius:4px; border:1px solid #ccc;">
                     <option value="8">8</option>
@@ -403,9 +409,9 @@
             
             <label style="font-weight:bold; font-size:13px; display:flex; flex-direction:column; gap:3px; border-top:1px solid #badbcc; padding-top:8px; margin-top:4px;">
                 <div style="display:flex; justify-content:space-between;">
-                    <span>Shape Width:</span> <span id="drawWidthVal" style="color:#0f5132;">2px</span>
+                    <span>Shape Width:</span> <span id="drawWidthVal" style="color:#0f5132;">4px</span>
                 </div>
-                <input type="range" id="drawWidth" min="1" max="30" value="2" style="width:100%; cursor:pointer;">
+                <input type="range" id="drawWidth" min="1" max="30" value="4" style="width:100%; cursor:pointer;">
             </label>
 
             <button class="sidebar-btn" id="btnText" style="border-color:#0d6efd; color:#0d6efd; font-weight:bold; margin-top:5px;">T Add Text</button>
@@ -508,7 +514,7 @@
         GLOBAL VARIABLES
         ************************************************/
         let recLogoSrc = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/REC_logo.svg/1280px-REC_logo.svg.png";
-        let nptiLogoSrc = "";
+        let nptiLogoSrc = "https://drive.google.com/thumbnail?id=1iEN9jQ5MmkklgiRvmlNihZd4QH3F3DhC&sz=w1000";
         let reportModified = false;
 
         let cropper = null;
@@ -680,7 +686,6 @@
                 fCanvas.imageSmoothingEnabled = false;
                 fCanvas.customEnhancements = { bright: 0, contrast: 0, sat: 0, sharpen: 0 };
 
-                // Track selections to update Text UI
                 fCanvas.on('selection:created', syncTextUI);
                 fCanvas.on('selection:updated', syncTextUI);
 
@@ -700,7 +705,8 @@
                         tempLine = new fabric.Line([startX, startY, startX, startY], {
                             stroke: getColor(), strokeWidth: getWidth(),
                             originX: 'center', originY: 'center',
-                            selectable: false, evented: false
+                            selectable: false, evented: false,
+                            strokeUniform: true 
                         });
                         fCanvas.add(tempLine);
 
@@ -709,7 +715,8 @@
                                 width: 10 + getWidth() * 2.5, height: 10 + getWidth() * 2.5,
                                 fill: getColor(), left: startX, top: startY,
                                 originX: 'center', originY: 'center',
-                                selectable: false, evented: false, angle: 90
+                                selectable: false, evented: false, angle: 90,
+                                strokeUniform: true 
                             });
                             fCanvas.add(tempArrowHead);
                         }
@@ -931,7 +938,6 @@
             return btn.classList.contains('active');
         }
 
-        // TEXT FORMATTING BUTTONS (Bold, Italic, Underline)
         document.getElementById('btnBold').onclick = function() {
             const isActive = toggleFormatBtn('btnBold');
             if (window.activeFCanvas) {
@@ -968,7 +974,6 @@
             }
         };
 
-        // FONT SIZE DROPDOWN
         document.getElementById('drawFontSize').addEventListener('change', function() {
             if (window.activeFCanvas) {
                 const activeObj = window.activeFCanvas.getActiveObject();
@@ -980,7 +985,6 @@
             }
         });
 
-        // FONT FAMILY DROPDOWN
         document.getElementById('drawFont').addEventListener('change', function() {
             if (window.activeFCanvas) {
                 const activeObj = window.activeFCanvas.getActiveObject();
@@ -992,7 +996,6 @@
             }
         });
 
-        // COLOR PICKER
         document.getElementById('drawColor').addEventListener('input', function() {
             if (window.activeFCanvas) {
                 const activeObj = window.activeFCanvas.getActiveObject();
@@ -1013,7 +1016,6 @@
             }
         });
 
-        // SHAPE WIDTH SLIDER
         document.getElementById('drawWidth').addEventListener('input', function() {
             const w = parseInt(this.value, 10);
             document.getElementById('drawWidthVal').innerText = w + 'px';
@@ -1042,7 +1044,8 @@
             const circle = new fabric.Circle({
                 radius: 40, fill: 'transparent', stroke: getColor(), strokeWidth: getWidth(),
                 left: window.activeFCanvas.width / 2, top: window.activeFCanvas.height / 2,
-                originX: 'center', originY: 'center'
+                originX: 'center', originY: 'center',
+                strokeUniform: true 
             });
             window.activeFCanvas.add(circle).setActiveObject(circle);
             markReportModified();
@@ -1053,7 +1056,8 @@
             const rect = new fabric.Rect({
                 width: 80, height: 80, fill: 'transparent', stroke: getColor(), strokeWidth: getWidth(),
                 left: window.activeFCanvas.width / 2, top: window.activeFCanvas.height / 2,
-                originX: 'center', originY: 'center'
+                originX: 'center', originY: 'center',
+                strokeUniform: true 
             });
             window.activeFCanvas.add(rect).setActiveObject(rect);
             markReportModified();
@@ -1092,15 +1096,52 @@
             }
         };
 
+        /************************************************
+        GLOBAL CLICK & ESCAPE LISTENER
+        ************************************************/
+        document.addEventListener("mousedown", function(e) {
+            if (e.target.closest('.photoContainer')) return;
+            if (e.target.closest('#rightSidebar') || e.target.closest('.buttonRow') || e.target.closest('#cropModal')) return;
+
+            if (window.activeFCanvas) {
+                if (isDrawingMode) {
+                    isDrawingMode = false;
+                    currentDrawType = '';
+                    if (tempLine) window.activeFCanvas.remove(tempLine);
+                    if (tempArrowHead) window.activeFCanvas.remove(tempArrowHead);
+                    tempLine = null;
+                    tempArrowHead = null;
+                    toggleCanvasDrawingState(window.activeFCanvas, false); 
+                }
+
+                window.activeFCanvas.discardActiveObject();
+                window.activeFCanvas.renderAll();
+            }
+            
+            document.querySelectorAll('.photoContainer').forEach(c => c.style.outline = 'none');
+            window.activeFCanvas = null;
+        });
+
         document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && isDrawingMode) {
-                isDrawingMode = false;
-                currentDrawType = '';
-                if (tempLine) window.activeFCanvas.remove(tempLine);
-                if (tempArrowHead) window.activeFCanvas.remove(tempArrowHead);
-                tempLine = null;
-                tempArrowHead = null;
-                toggleCanvasDrawingState(window.activeFCanvas, false); 
+            if (e.key === "Escape") {
+                if (isDrawingMode) {
+                    isDrawingMode = false;
+                    currentDrawType = '';
+                    if (tempLine && window.activeFCanvas) window.activeFCanvas.remove(tempLine);
+                    if (tempArrowHead && window.activeFCanvas) window.activeFCanvas.remove(tempArrowHead);
+                    tempLine = null;
+                    tempArrowHead = null;
+                    if (window.activeFCanvas) toggleCanvasDrawingState(window.activeFCanvas, false); 
+                }
+
+                if (window.activeFCanvas) {
+                    window.activeFCanvas.discardActiveObject();
+                    window.activeFCanvas.renderAll();
+                }
+                
+                document.querySelectorAll('.photoContainer').forEach(c => c.style.outline = 'none');
+                window.activeFCanvas = null;
+                return;
             }
 
             if (!window.activeFCanvas) return;
@@ -1110,7 +1151,6 @@
             if (!activeObj) return;
 
             if ((e.key === "Delete" || e.key === "Backspace") && activeObj !== window.activeFCanvas.mainImage) {
-                // Check if user is editing text (cursor inside text)
                 if (activeObj.type === 'i-text' && activeObj.isEditing) return;
 
                 e.preventDefault();
@@ -1120,7 +1160,6 @@
             }
 
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-                // If editing text, allow normal arrow key movement inside the text box
                 if (activeObj.type === 'i-text' && activeObj.isEditing) return;
 
                 e.preventDefault(); 
@@ -1154,16 +1193,47 @@
         }
 
         /************************************************
-        PRINT SETTINGS
+        PRINT EVENT HANDLERS (SVG EXPORT FOR EDITABLE PDF)
         ************************************************/
         window.addEventListener("beforeprint", function () {
-            document.querySelectorAll('.photoContainer').forEach(c => c.style.outline = 'none');
-            
+            // 1. Deselect objects
             if (window.activeFCanvas) {
                 window.activeFCanvas.discardActiveObject();
                 window.activeFCanvas.renderAll();
             }
 
+            // 2. Loop through all canvases and convert to SVG
+            document.querySelectorAll('.photoContainer').forEach(container => {
+                container.style.outline = 'none';
+                
+                if (container.fCanvasInstance) {
+                    const fCanvas = container.fCanvasInstance;
+                    fCanvas.discardActiveObject();
+                    fCanvas.renderAll();
+
+                    // Convert to SVG String (Preserves vectors & text!)
+                    const svgData = fCanvas.toSVG();
+                    
+                    // Create an SVG wrapper for the print view
+                    const svgWrapper = document.createElement('div');
+                    svgWrapper.className = 'print-svg-wrapper';
+                    svgWrapper.style.width = '100%';
+                    svgWrapper.style.height = '100%';
+                    svgWrapper.style.position = 'absolute';
+                    svgWrapper.style.top = '0';
+                    svgWrapper.style.left = '0';
+                    svgWrapper.style.zIndex = '5';
+                    svgWrapper.innerHTML = svgData;
+
+                    container.appendChild(svgWrapper);
+
+                    // Hide the HTML5 Canvas during printing
+                    const canvasWrapper = container.querySelector('.canvas-container');
+                    if (canvasWrapper) canvasWrapper.style.display = 'none';
+                }
+            });
+
+            // 3. Remove border styling from text inputs
             document.querySelectorAll(".text_area, .remarks, .photoNumber").forEach(function (t) {
                 t.style.border = "none";
                 t.style.background = "transparent";
@@ -1171,6 +1241,16 @@
         });
 
         window.addEventListener("afterprint", function () {
+            // 1. Restore HTML5 Canvas and remove SVG
+            document.querySelectorAll('.photoContainer').forEach(container => {
+                const svgWrapper = container.querySelector('.print-svg-wrapper');
+                if (svgWrapper) container.removeChild(svgWrapper);
+
+                const canvasWrapper = container.querySelector('.canvas-container');
+                if (canvasWrapper) canvasWrapper.style.display = 'block';
+            });
+
+            // 2. Restore border styling to text inputs
             document.querySelectorAll(".text_area, .remarks, .photoNumber").forEach(function (t) {
                 t.style.border = "1px solid #888";
                 t.style.background = "#fff";
