@@ -56,11 +56,11 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #badbcc;
-            display: none; /* Hidden until generated, then becomes flex */
+            display: none; 
             flex-direction: column;
             gap: 8px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-            width: 160px;
+            width: 200px; /* Widened slightly to fit new text tools */
             pointer-events: auto;
         }
 
@@ -69,7 +69,7 @@
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #c6c7c8;
-            display: none; /* Hidden until toggled, then becomes flex */
+            display: none; 
             flex-direction: column;
             gap: 12px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
@@ -93,7 +93,23 @@
             background: #f0f0f0;
         }
 
-        input {
+        /* Text formatting toggle buttons */
+        .format-btn {
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-family: "Times New Roman", serif;
+        }
+        .format-btn.active {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        input, select {
             font-family: "Times New Roman", serif;
         }
 
@@ -339,32 +355,71 @@
         
         <!-- DRAWING TOOLBAR -->
         <div class="drawToolbar" id="drawToolbar">
-            <div style="font-weight:bold; color:#0f5132; text-align:center; border-bottom:1px solid #badbcc; padding-bottom:5px;">Draw Tools</div>
+            <div style="font-weight:bold; color:#0f5132; text-align:center; border-bottom:1px solid #badbcc; padding-bottom:5px;">Draw & Text Tools</div>
             
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
                 <span style="font-size:13px; font-weight:bold;">Color:</span>
-                <input type="color" id="drawColor" value="#ff0000" title="Shape Color" style="cursor:pointer; width:60px; height:25px; padding:0; border:1px solid #ccc; border-radius:4px;">
+                <input type="color" id="drawColor" value="#ff0000" title="Shape/Text Color" style="cursor:pointer; width:60px; height:25px; padding:0; border:1px solid #ccc; border-radius:4px;">
+            </div>
+
+            <!-- FONT SELECTION -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px; font-weight:bold;">Font:</span>
+                <select id="drawFont" style="width:100px; padding:2px; font-size:12px; cursor:pointer; border-radius:4px; border:1px solid #ccc;">
+                    <option value="Arial" style="font-family:Arial;">Arial</option>
+                    <option value="Times New Roman" style="font-family:'Times New Roman';">Times Roman</option>
+                    <option value="Courier New" style="font-family:'Courier New';">Courier</option>
+                    <option value="Georgia" style="font-family:Georgia;">Georgia</option>
+                    <option value="Verdana" style="font-family:Verdana;">Verdana</option>
+                </select>
+            </div>
+
+            <!-- NEW: TEXT FORMATTING (Size, Bold, Italic, Underline) -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <select id="drawFontSize" title="Font Size" style="width:50px; padding:2px; font-size:12px; cursor:pointer; border-radius:4px; border:1px solid #ccc;">
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="20">20</option>
+                    <option value="24">24</option>
+                    <option value="28">28</option>
+                    <option value="32" selected>32</option>
+                    <option value="36">36</option>
+                    <option value="48">48</option>
+                    <option value="72">72</option>
+                </select>
+                
+                <div style="display:flex; gap:3px;">
+                    <button class="format-btn" id="btnBold" title="Bold" style="font-weight:bold;">B</button>
+                    <button class="format-btn" id="btnItalic" title="Italic" style="font-style:italic;">I</button>
+                    <button class="format-btn" id="btnUnderline" title="Underline" style="text-decoration:underline;">U</button>
+                </div>
             </div>
             
-            <label style="font-weight:bold; font-size:13px; display:flex; flex-direction:column; gap:3px;">
+            <label style="font-weight:bold; font-size:13px; display:flex; flex-direction:column; gap:3px; border-top:1px solid #badbcc; padding-top:8px; margin-top:4px;">
                 <div style="display:flex; justify-content:space-between;">
-                    <span>Width:</span> <span id="drawWidthVal" style="color:#0f5132;">2px</span>
+                    <span>Shape Width:</span> <span id="drawWidthVal" style="color:#0f5132;">2px</span>
                 </div>
-                <input type="range" id="drawWidth" min="1" max="25" value="2" style="width:100%; cursor:pointer;">
+                <input type="range" id="drawWidth" min="1" max="30" value="2" style="width:100%; cursor:pointer;">
             </label>
 
-            <button class="sidebar-btn" id="btnCircle">⭕ Circle</button>
-            <button class="sidebar-btn" id="btnRect">🟥 Rectangle</button>
+            <button class="sidebar-btn" id="btnText" style="border-color:#0d6efd; color:#0d6efd; font-weight:bold; margin-top:5px;">T Add Text</button>
             <button class="sidebar-btn" id="btnLine">📏 Draw Line</button>
             <button class="sidebar-btn" id="btnArrow">↗ Draw Arrow</button>
-            <button class="sidebar-btn" id="btnText">T Text</button>
+            <button class="sidebar-btn" id="btnCircle">⭕ Circle</button>
+            <button class="sidebar-btn" id="btnRect">🟥 Rectangle</button>
             
             <button class="sidebar-btn" id="btnDel" style="background:#f8d7da; border-color:#f5c2c7; color:#842029; font-weight:bold; margin-top:5px; text-align:center;">🗑️ Delete Selected</button>
             
             <button class="sidebar-btn" id="btnToggleEnhance" style="background:#0d6efd; color:white; font-weight:bold; margin-top:5px; text-align:center; border:none;">🎨 Enhance Photo</button>
         </div>
 
-        <!-- ENHANCE TOOLBAR (Opens to the LEFT of Drawing Toolbar) -->
+        <!-- ENHANCE TOOLBAR -->
         <div class="enhanceToolbar" id="enhanceToolbar">
             <div style="font-weight:bold; color:#41464b; text-align:center; border-bottom:1px solid #c6c7c8; padding-bottom:5px;">Adjustments</div>
             
@@ -452,8 +507,8 @@
         /************************************************
         GLOBAL VARIABLES
         ************************************************/
-        let recLogoSrc = "https://upload.wikimedia.org/wikipedia/en/4/4a/TheFirmIncLogo.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original";
-        let nptiLogoSrc = "https://upload.wikimedia.org/wikipedia/en/4/4a/TheFirmIncLogo.jpg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original";
+        let recLogoSrc = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/REC_logo.svg/1280px-REC_logo.svg.png";
+        let nptiLogoSrc = "";
         let reportModified = false;
 
         let cropper = null;
@@ -565,7 +620,7 @@
         });
 
         /************************************************
-        DRAWING MODE LOCK (PREVENTS IMAGE DRAGGING)
+        DRAWING MODE LOCK
         ************************************************/
         function toggleCanvasDrawingState(canvas, isDrawing) {
             if (!canvas) return;
@@ -576,6 +631,27 @@
             });
             canvas.defaultCursor = isDrawing ? 'crosshair' : 'default';
             canvas.renderAll();
+        }
+
+        /************************************************
+        SYNC TEXT UI (Updates Sidebar when clicking text)
+        ************************************************/
+        function syncTextUI() {
+            if (!window.activeFCanvas) return;
+            const obj = window.activeFCanvas.getActiveObject();
+            if (obj && obj.type === 'i-text') {
+                document.getElementById('drawFont').value = obj.fontFamily || 'Arial';
+                document.getElementById('drawFontSize').value = obj.fontSize || 32;
+                
+                if (obj.fontWeight === 'bold') document.getElementById('btnBold').classList.add('active');
+                else document.getElementById('btnBold').classList.remove('active');
+
+                if (obj.fontStyle === 'italic') document.getElementById('btnItalic').classList.add('active');
+                else document.getElementById('btnItalic').classList.remove('active');
+
+                if (obj.underline) document.getElementById('btnUnderline').classList.add('active');
+                else document.getElementById('btnUnderline').classList.remove('active');
+            }
         }
 
         /************************************************
@@ -599,16 +675,22 @@
                     selection: true,
                     preserveObjectStacking: true
                 });
+                
+                container.fCanvasInstance = fCanvas; 
                 fCanvas.imageSmoothingEnabled = false;
                 fCanvas.customEnhancements = { bright: 0, contrast: 0, sat: 0, sharpen: 0 };
 
-                // MOUSE DOWN
+                // Track selections to update Text UI
+                fCanvas.on('selection:created', syncTextUI);
+                fCanvas.on('selection:updated', syncTextUI);
+
                 fCanvas.on('mouse:down', function(o) {
                     window.activeFCanvas = fCanvas;
                     document.querySelectorAll('.photoContainer').forEach(c => c.style.outline = 'none');
                     container.style.outline = '3px solid #0d6efd';
                     
-                    syncEnhanceSliders(); // Update enhancement toolbar sliders
+                    syncEnhanceSliders(); 
+                    syncTextUI();
 
                     if (isDrawingMode) {
                         var pointer = fCanvas.getPointer(o.e);
@@ -634,7 +716,6 @@
                     }
                 });
 
-                // MOUSE MOVE
                 fCanvas.on('mouse:move', function(o) {
                     if (!isDrawingMode || !tempLine) return;
                     var pointer = fCanvas.getPointer(o.e);
@@ -642,17 +723,13 @@
                     tempLine.set({ x2: pointer.x, y2: pointer.y });
 
                     if (currentDrawType === 'arrow' && tempArrowHead) {
-                        // FIX: Keep arrowhead exactly at the starting click coordinates
                         tempArrowHead.set({ left: startX, top: startY });
-                        
-                        // FIX: Arrow points from the end point towards the starting point
                         let angle = Math.atan2(startY - pointer.y, startX - pointer.x) * 180 / Math.PI;
                         tempArrowHead.set({ angle: angle + 90 });
                     }
                     fCanvas.renderAll();
                 });
 
-                // MOUSE UP
                 fCanvas.on('mouse:up', function(o) {
                     if (isDrawingMode && tempLine) {
                         isDrawingMode = false;
@@ -679,7 +756,7 @@
                         tempLine = null;
                         tempArrowHead = null;
                         currentDrawType = '';
-                        toggleCanvasDrawingState(fCanvas, false); // Unlock image dragging
+                        toggleCanvasDrawingState(fCanvas, false); 
                         fCanvas.renderAll();
                         markReportModified();
                     }
@@ -704,7 +781,6 @@
                         placeholder.style.display = 'none';
                         cropBtn.style.display = 'block';
                         
-                        // Keep a reference to the uncropped original for cropper tool
                         fCanvas.originalImgSrc = e.target.result; 
                         setAdjustableImage(fCanvas, e.target.result);
                     };
@@ -722,37 +798,25 @@
             });
         }
 
-        /************************************************
-        SET IMAGE AS ADJUSTABLE OBJECT
-        ************************************************/
         function setAdjustableImage(canvas, dataUrl) {
             fabric.Image.fromURL(dataUrl, function(img) {
                 img.set({ 
-                    originX: 'center', 
-                    originY: 'center', 
-                    left: canvas.width / 2,
-                    top: canvas.height / 2,
+                    originX: 'center', originY: 'center', 
+                    left: canvas.width / 2, top: canvas.height / 2,
                     objectCaching: false 
                 });
-                
-                // Stretch to fill completely by default
                 img.set({
                     scaleX: canvas.width / img.width,
                     scaleY: canvas.height / img.height
                 });
-                
-                // Keep the text sharp
                 img.imageSmoothing = false;
                 
-                if (canvas.mainImage) {
-                    canvas.remove(canvas.mainImage);
-                }
+                if (canvas.mainImage) canvas.remove(canvas.mainImage);
                 
                 canvas.mainImage = img;
                 canvas.add(img);
-                canvas.sendToBack(img); // Keeps image firmly behind all drawings
+                canvas.sendToBack(img); 
                 
-                // Reset all filters for this canvas when a new image is loaded
                 canvas.customEnhancements = { bright: 0, contrast: 0, sat: 0, sharpen: 0 };
                 syncEnhanceSliders(); 
                 markReportModified();
@@ -769,10 +833,7 @@
                 imageSmoothingQuality: "high"
             });
             const croppedDataUrl = croppedCanvas.toDataURL("image/jpeg", 1);
-            
-            // Replace the canvas image object with the newly cropped version
             setAdjustableImage(window.activeFCanvas, croppedDataUrl);
-            
             closeCropModal();
         };
 
@@ -785,15 +846,11 @@
         }
 
         /************************************************
-        ENHANCE PHOTO (BRIGHTNESS, CONTRAST, COLOR, SHARPEN)
+        ENHANCE PHOTO
         ************************************************/
         const btnToggleEnhance = document.getElementById("btnToggleEnhance");
         btnToggleEnhance.onclick = function() {
-            if (enhanceToolbar.style.display === "flex") {
-                enhanceToolbar.style.display = "none";
-            } else {
-                enhanceToolbar.style.display = "flex";
-            }
+            enhanceToolbar.style.display = (enhanceToolbar.style.display === "flex") ? "none" : "flex";
         };
 
         function syncEnhanceSliders() {
@@ -811,7 +868,6 @@
                 return;
             }
             let img = window.activeFCanvas.mainImage;
-            
             let bVal = parseFloat(document.getElementById('valBright').value);
             let cVal = parseFloat(document.getElementById('valContrast').value);
             let sVal = parseFloat(document.getElementById('valSat').value);
@@ -820,23 +876,14 @@
             window.activeFCanvas.customEnhancements = { bright: bVal, contrast: cVal, sat: sVal, sharpen: shVal };
 
             img.filters = [];
-            
             if (bVal !== 0) img.filters.push(new fabric.Image.filters.Brightness({ brightness: bVal }));
             if (cVal !== 0) img.filters.push(new fabric.Image.filters.Contrast({ contrast: cVal }));
             if (sVal !== 0) img.filters.push(new fabric.Image.filters.Saturation({ saturation: sVal }));
-            
             if (shVal > 0) {
                 let center = 1 + (4 * shVal); 
                 let edge = -shVal;
-                img.filters.push(new fabric.Image.filters.Convolute({
-                    matrix: [
-                        0, edge, 0,
-                        edge, center, edge,
-                        0, edge, 0
-                    ]
-                }));
+                img.filters.push(new fabric.Image.filters.Convolute({ matrix: [0, edge, 0, edge, center, edge, 0, edge, 0] }));
             }
-            
             img.applyFilters();
             window.activeFCanvas.renderAll();
             markReportModified();
@@ -855,7 +902,7 @@
         };
 
         /************************************************
-        DRAWING TOOLS LOGIC
+        DRAWING & TEXT TOOLS LOGIC
         ************************************************/
         function checkActiveCanvas() {
             if (!window.activeFCanvas) {
@@ -870,12 +917,82 @@
             isDrawingMode = true;
             currentDrawType = type;
             window.activeFCanvas.discardActiveObject();
-            toggleCanvasDrawingState(window.activeFCanvas, true); // Lock image dragging
+            toggleCanvasDrawingState(window.activeFCanvas, true); 
         }
 
         function getColor() { return document.getElementById('drawColor').value; }
         function getWidth() { return parseInt(document.getElementById('drawWidth').value, 10); }
+        function getFont() { return document.getElementById('drawFont').value; }
+        function getFontSize() { return parseInt(document.getElementById('drawFontSize').value, 10); }
 
+        function toggleFormatBtn(btnId) {
+            const btn = document.getElementById(btnId);
+            btn.classList.toggle('active');
+            return btn.classList.contains('active');
+        }
+
+        // TEXT FORMATTING BUTTONS (Bold, Italic, Underline)
+        document.getElementById('btnBold').onclick = function() {
+            const isActive = toggleFormatBtn('btnBold');
+            if (window.activeFCanvas) {
+                const obj = window.activeFCanvas.getActiveObject();
+                if (obj && obj.type === 'i-text') {
+                    obj.set('fontWeight', isActive ? 'bold' : 'normal');
+                    window.activeFCanvas.renderAll();
+                    markReportModified();
+                }
+            }
+        };
+
+        document.getElementById('btnItalic').onclick = function() {
+            const isActive = toggleFormatBtn('btnItalic');
+            if (window.activeFCanvas) {
+                const obj = window.activeFCanvas.getActiveObject();
+                if (obj && obj.type === 'i-text') {
+                    obj.set('fontStyle', isActive ? 'italic' : 'normal');
+                    window.activeFCanvas.renderAll();
+                    markReportModified();
+                }
+            }
+        };
+
+        document.getElementById('btnUnderline').onclick = function() {
+            const isActive = toggleFormatBtn('btnUnderline');
+            if (window.activeFCanvas) {
+                const obj = window.activeFCanvas.getActiveObject();
+                if (obj && obj.type === 'i-text') {
+                    obj.set('underline', isActive);
+                    window.activeFCanvas.renderAll();
+                    markReportModified();
+                }
+            }
+        };
+
+        // FONT SIZE DROPDOWN
+        document.getElementById('drawFontSize').addEventListener('change', function() {
+            if (window.activeFCanvas) {
+                const activeObj = window.activeFCanvas.getActiveObject();
+                if (activeObj && activeObj.type === 'i-text') {
+                    activeObj.set('fontSize', getFontSize());
+                    window.activeFCanvas.renderAll();
+                    markReportModified();
+                }
+            }
+        });
+
+        // FONT FAMILY DROPDOWN
+        document.getElementById('drawFont').addEventListener('change', function() {
+            if (window.activeFCanvas) {
+                const activeObj = window.activeFCanvas.getActiveObject();
+                if (activeObj && activeObj.type === 'i-text') {
+                    activeObj.set('fontFamily', this.value);
+                    window.activeFCanvas.renderAll();
+                    markReportModified();
+                }
+            }
+        });
+
+        // COLOR PICKER
         document.getElementById('drawColor').addEventListener('input', function() {
             if (window.activeFCanvas) {
                 const activeObj = window.activeFCanvas.getActiveObject();
@@ -896,6 +1013,7 @@
             }
         });
 
+        // SHAPE WIDTH SLIDER
         document.getElementById('drawWidth').addEventListener('input', function() {
             const w = parseInt(this.value, 10);
             document.getElementById('drawWidthVal').innerText = w + 'px';
@@ -943,11 +1061,22 @@
 
         document.getElementById("btnText").onclick = () => {
             if (!checkActiveCanvas()) return;
+            
+            const isBold = document.getElementById("btnBold").classList.contains("active");
+            const isItalic = document.getElementById("btnItalic").classList.contains("active");
+            const isUnderline = document.getElementById("btnUnderline").classList.contains("active");
+
             const text = new fabric.IText('Edit Text', {
-                fill: getColor(), fontSize: 30, fontWeight: 'bold',
-                left: window.activeFCanvas.width / 2, top: window.activeFCanvas.height / 2,
-                originX: 'center', originY: 'center',
-                fontFamily: 'Arial'
+                fill: getColor(), 
+                fontSize: getFontSize(), 
+                fontWeight: isBold ? 'bold' : 'normal',
+                fontStyle: isItalic ? 'italic' : 'normal',
+                underline: isUnderline,
+                left: window.activeFCanvas.width / 2, 
+                top: window.activeFCanvas.height / 2,
+                originX: 'center', 
+                originY: 'center',
+                fontFamily: getFont()
             });
             window.activeFCanvas.add(text).setActiveObject(text);
             markReportModified();
@@ -981,6 +1110,9 @@
             if (!activeObj) return;
 
             if ((e.key === "Delete" || e.key === "Backspace") && activeObj !== window.activeFCanvas.mainImage) {
+                // Check if user is editing text (cursor inside text)
+                if (activeObj.type === 'i-text' && activeObj.isEditing) return;
+
                 e.preventDefault();
                 window.activeFCanvas.remove(activeObj);
                 window.activeFCanvas.discardActiveObject();
@@ -988,6 +1120,9 @@
             }
 
             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                // If editing text, allow normal arrow key movement inside the text box
+                if (activeObj.type === 'i-text' && activeObj.isEditing) return;
+
                 e.preventDefault(); 
                 const step = e.shiftKey ? 15 : 2; 
                 switch (e.key) {
